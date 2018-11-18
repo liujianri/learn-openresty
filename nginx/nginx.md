@@ -8,40 +8,40 @@
 ***
 ### 示例
 #### 例子2
-geo $dollar {
-    default "$";
-}
-
-server {
-    listen 8080;
-
-    location /test {
-        echo "This is a dollar sign: $dollar";
+    geo $dollar {
+        default "$";
     }
-}
 
-$ curl 'http://localhost:8080/test'
-This is a dollar sign: $
+    server {
+        listen 8080;
+
+        location /test {
+            echo "This is a dollar sign: $dollar";
+        }
+    }
+
+    $ curl 'http://localhost:8080/test'
+    This is a dollar sign: $
 
 #### 例子2
-server {
-    listen 8080;
+    server {
+        listen 8080;
 
-    location /foo {
-        echo "foo = [$foo]";
+        location /foo {
+            echo "foo = [$foo]";
+        }
+
+        location /bar {
+            set $foo 32;
+            echo "foo = [$foo]";
+        }
     }
 
-    location /bar {
-        set $foo 32;
-        echo "foo = [$foo]";
-    }
-}
+    $ curl 'http://localhost:8080/foo'
+    foo = []
 
-$ curl 'http://localhost:8080/foo'
-foo = []
+    $ curl 'http://localhost:8080/bar'
+    foo = [32]
 
-$ curl 'http://localhost:8080/bar'
-foo = [32]
-
-$ curl 'http://localhost:8080/foo'
-foo = []
+    $ curl 'http://localhost:8080/foo'
+    foo = []
