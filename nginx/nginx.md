@@ -11,7 +11,7 @@
     都有各变量用来存放值的容器的独立副本，彼此互不干扰
 ***
 #### 示例
-##### 例子1
+##### 例1
     geo $dollar {
         default "$";
     }
@@ -27,7 +27,7 @@
     $ curl 'http://localhost:8080/test'
     This is a dollar sign: $
 
-##### 例子2
+##### 例2
     server {
         listen 8080;
 
@@ -64,7 +64,7 @@
 7. 可使用第三方 ngx_set_misc 模块提供的 set_unescape_uri 进行解码
 ***
 #### 示例
-##### 例子3
+##### 例3
     server {
         listen 8080;
  
@@ -81,7 +81,7 @@
     $ curl localhost:8080/foo
     a = [hello]
 
-##### 例子4
+##### 例4
     server {
         listen 8080;
  
@@ -103,3 +103,52 @@
     $ curl 'http://localhost:8080/test?name=Tom&class=3'
     name: Tom
     class: 3
+
+### 第三课
+#### 知识点：
+***
+1. 一些内建变量是支持改写，
+2. $args. 这个变量在读取时返回当前请求的 URL 参数串（例子5）
+3. 对 $args 的修改会影响到所有部分的功能,如：set $args "a=5"， echo "$args_a" 无论请求参数是啥 会得到结果是 5 ；
+4. 像 $arg_XXX 这样具有无数变种的变量群，是“未索引的”。当读取这样的变量时，
+    其实是它的“取处理程序”在起作用，即实时扫描当前请求的 URL 参数串，提取出变量名所指定的 URL 参数的值
+5. Nginx 根本不会事先就解析好 URL 参数串，而是在用户读取某个 $arg_XXX 变量时，调用其“取处理程序”，即时去扫描 URL 参数串（例子6）。
+***
+#### 示例
+##### 例5
+    location /test {
+        set $orig_args $args;
+        set $args "a=3&b=4";
+ 
+        echo "original args: $orig_args";
+        echo "args: $args";
+    }
+
+    $ curl 'http://localhost:8080/test'
+    original args: 
+    args: a=3&b=4
+ 
+    $ curl 'http://localhost:8080/test?a=0&b=1&c=2'
+    original args: a=0&b=1&c=2
+    args: a=3&b=4
+
+##### 例6  代理模块 ngx_proxy
+    server {
+        listen 8080;
+ 
+        location /test {
+            set $args "foo=1&bar=2";
+            proxy_pass http://127.0.0.1:8081/args;
+        }
+    }
+ 
+    server {
+        listen 8081;
+ 
+        location /args {
+            echo "args: $args";
+        }
+    }
+    
+    $ curl 'http://localhost:8080/test?blah=7'
+    args: foo=1&bar=2
