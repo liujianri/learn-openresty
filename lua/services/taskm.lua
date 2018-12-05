@@ -9,8 +9,9 @@ function _M:new(action, arg)
 	
 	local conf = conf.def_redis
 	local red = redis:new(conf.host,conf.port)
+	local meth = {getV="get", mgetV="mget"}
+	
 
-	local json = ''
 	if action == 'get' then
 		json = red:getV(arg['param'])
 	elseif action == 'mget' then
